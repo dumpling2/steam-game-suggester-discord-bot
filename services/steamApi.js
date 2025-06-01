@@ -11,7 +11,7 @@ class SteamApiService {
     this.cacheDir = path.join(__dirname, '..', 'cache');
     this.appListCache = null;
     this.appListCacheTime = null;
-    
+
     // キャッシュマネージャーを初期化
     this.cacheManager = new CacheManager(this.cacheDir);
 
@@ -65,7 +65,7 @@ class SteamApiService {
 
   async getAppDetails(appId, language = 'japanese') {
     const cacheKey = `steam_app_${appId}_${language}`;
-    
+
     // キャッシュから取得を試みる
     const cachedData = await this.cacheManager.get(cacheKey);
     if (cachedData) {
@@ -91,7 +91,7 @@ class SteamApiService {
 
         // キャッシュに保存
         await this.cacheManager.set(cacheKey, data.data, CACHE_DURATION.GAME_DETAILS);
-        
+
         return data.data;
       }
     } catch (error) {

@@ -14,7 +14,7 @@ describe('RawgApiService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.resetModules();
-    
+
     // createRateLimitedClientをモック
     mockHttpClient = {
       get: jest.fn(),
@@ -22,7 +22,7 @@ describe('RawgApiService', () => {
     jest.doMock('../../utils/httpClient', () => ({
       createRateLimitedClient: jest.fn(() => mockHttpClient),
     }));
-    
+
     // モジュールを再読み込み
     rawgApi = require('../../services/rawgApi');
   });

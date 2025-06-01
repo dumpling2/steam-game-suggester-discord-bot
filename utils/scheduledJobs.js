@@ -33,7 +33,7 @@ class ScheduledJobs {
     });
 
     logger.info('スケジュールジョブを開始しました');
-    
+
     // 初回実行
     this.runCacheCleanup();
     this.logCacheStats();

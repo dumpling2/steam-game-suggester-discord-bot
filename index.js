@@ -44,7 +44,7 @@ client.once('ready', () => {
   try {
     loadCommands();
     logger.info('All commands loaded successfully');
-    
+
     // スケジュールジョブを開始
     scheduledJobs.start();
   } catch (error) {

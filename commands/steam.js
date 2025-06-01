@@ -5,6 +5,7 @@ const steamSaleHandler = require('./handlers/steamSale');
 const steamGenreHandler = require('./handlers/steamGenre');
 const steamTopRatedHandler = require('./handlers/steamTopRated');
 const steamPriceHandler = require('./handlers/steamPrice');
+const steamRateHandler = require('./handlers/steamRate');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -79,6 +80,30 @@ module.exports = {
       subcommand
         .setName('free')
         .setDescription('無料ゲームをおすすめします'),
+    )
+    .addSubcommand(subcommand =>
+      subcommand
+        .setName('評価')
+        .setDescription('ゲームを評価します')
+        .addStringOption(option =>
+          option
+            .setName('ゲーム名')
+            .setDescription('評価するゲーム名')
+            .setRequired(true),
+        )
+        .addIntegerOption(option =>
+          option
+            .setName('評価')
+            .setDescription('評価 (1-5)')
+            .setRequired(true)
+            .addChoices(
+              { name: '★☆☆☆☆ (1) 悪い', value: 1 },
+              { name: '★★☆☆☆ (2) 微妙', value: 2 },
+              { name: '★★★☆☆ (3) 普通', value: 3 },
+              { name: '★★★★☆ (4) 良い', value: 4 },
+              { name: '★★★★★ (5) 最高', value: 5 },
+            ),
+        ),
     ),
 
   async execute(interaction) {
@@ -106,6 +131,9 @@ module.exports = {
       break;
     case 'free':
       await steamPriceHandler(interaction, 0);
+      break;
+    case '評価':
+      await steamRateHandler.execute(interaction);
       break;
     default:
       await interaction.reply({ content: 'このサブコマンドはまだ実装されていません。', ephemeral: true });

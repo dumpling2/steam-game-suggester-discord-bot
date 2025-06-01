@@ -14,7 +14,7 @@ describe('ItadApiService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.resetModules();
-    
+
     // createRateLimitedClientをモック
     mockHttpClient = {
       get: jest.fn(),
@@ -22,7 +22,7 @@ describe('ItadApiService', () => {
     jest.doMock('../../utils/httpClient', () => ({
       createRateLimitedClient: jest.fn(() => mockHttpClient),
     }));
-    
+
     // モジュールを再読み込み
     itadApi = require('../../services/itadApi');
   });

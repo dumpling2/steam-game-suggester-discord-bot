@@ -1,5 +1,4 @@
 const fs = require('fs').promises;
-const path = require('path');
 
 // モック
 jest.mock('fs', () => ({
@@ -24,7 +23,7 @@ describe('SteamApiService - API統合テスト', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.resetModules();
-    
+
     // createRateLimitedClientをモック
     mockHttpClient = {
       get: jest.fn(),
@@ -32,7 +31,7 @@ describe('SteamApiService - API統合テスト', () => {
     jest.doMock('../../utils/httpClient', () => ({
       createRateLimitedClient: jest.fn(() => mockHttpClient),
     }));
-    
+
     // モジュールを再読み込み
     steamApi = require('../../services/steamApi');
   });

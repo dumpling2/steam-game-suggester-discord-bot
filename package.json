@@ -12,18 +12,25 @@
     "build": "echo 'No build step required for JavaScript'",
     "deploy-commands": "node deploy-commands.js"
   },
-  "keywords": ["discord", "bot", "steam", "game", "recommendation"],
+  "keywords": [
+    "discord",
+    "bot",
+    "steam",
+    "game",
+    "recommendation"
+  ],
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "axios": "^1.6.2",
     "discord.js": "^14.14.1",
     "dotenv": "^16.3.1",
-    "axios": "^1.6.2",
+    "sqlite3": "^5.1.7",
     "string-similarity": "^4.0.4"
   },
   "devDependencies": {
-    "jest": "^29.7.0",
-    "eslint": "^8.55.0"
+    "eslint": "^8.55.0",
+    "jest": "^29.7.0"
   },
   "engines": {
     "node": ">=16.9.0"

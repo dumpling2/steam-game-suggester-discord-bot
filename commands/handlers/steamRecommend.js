@@ -91,27 +91,34 @@ module.exports = async function handleSteamRecommend(interaction) {
 
     const gameEmbed = GameEmbedBuilder.createGameEmbed(formattedGame);
 
-    const row = new ActionRowBuilder()
-      .addComponents(
-        new ButtonBuilder()
-          .setCustomId('recommend_another')
-          .setLabel('別のゲームをおすすめ')
-          .setStyle(ButtonStyle.Primary)
-          .setEmoji('🎲'),
-        new ButtonBuilder()
-          .setCustomId('rate_game_good')
-          .setLabel('👍 いいね')
-          .setStyle(ButtonStyle.Success),
-        new ButtonBuilder()
-          .setCustomId('rate_game_bad')
-          .setLabel('👎 よくない')
-          .setStyle(ButtonStyle.Danger),
+    const buttons = [
+      new ButtonBuilder()
+        .setCustomId('recommend_another')
+        .setLabel('別のゲームをおすすめ')
+        .setStyle(ButtonStyle.Primary)
+        .setEmoji('🎲'),
+      new ButtonBuilder()
+        .setCustomId('rate_game_good')
+        .setLabel('👍 いいね')
+        .setStyle(ButtonStyle.Success),
+      new ButtonBuilder()
+        .setCustomId('rate_game_bad')
+        .setLabel('👎 よくない')
+        .setStyle(ButtonStyle.Danger),
+    ];
+
+    // Steam URLがある場合のみSteamボタンを追加
+    if (formattedGame.storeUrl || formattedGame.url) {
+      buttons.push(
         new ButtonBuilder()
           .setLabel('Steamストアで見る')
           .setStyle(ButtonStyle.Link)
-          .setURL(formattedGame.storeUrl)
+          .setURL(formattedGame.storeUrl || formattedGame.url)
           .setEmoji('🛒'),
       );
+    }
+
+    const row = new ActionRowBuilder().addComponents(buttons);
 
     const response = await interaction.editReply({
       embeds: [gameEmbed],
@@ -181,27 +188,35 @@ module.exports = async function handleSteamRecommend(interaction) {
           }
 
           const newEmbed = GameEmbedBuilder.createGameEmbed(newGame);
-          const newRow = new ActionRowBuilder()
-            .addComponents(
-              new ButtonBuilder()
-                .setCustomId('recommend_another')
-                .setLabel('別のゲームをおすすめ')
-                .setStyle(ButtonStyle.Primary)
-                .setEmoji('🎲'),
-              new ButtonBuilder()
-                .setCustomId('rate_game_good')
-                .setLabel('👍 いいね')
-                .setStyle(ButtonStyle.Success),
-              new ButtonBuilder()
-                .setCustomId('rate_game_bad')
-                .setLabel('👎 よくない')
-                .setStyle(ButtonStyle.Danger),
+
+          const newButtons = [
+            new ButtonBuilder()
+              .setCustomId('recommend_another')
+              .setLabel('別のゲームをおすすめ')
+              .setStyle(ButtonStyle.Primary)
+              .setEmoji('🎲'),
+            new ButtonBuilder()
+              .setCustomId('rate_game_good')
+              .setLabel('👍 いいね')
+              .setStyle(ButtonStyle.Success),
+            new ButtonBuilder()
+              .setCustomId('rate_game_bad')
+              .setLabel('👎 よくない')
+              .setStyle(ButtonStyle.Danger),
+          ];
+
+          // Steam URLがある場合のみSteamボタンを追加
+          if (newGame.storeUrl || newGame.url) {
+            newButtons.push(
               new ButtonBuilder()
                 .setLabel('Steamストアで見る')
                 .setStyle(ButtonStyle.Link)
-                .setURL(newGame.storeUrl)
+                .setURL(newGame.storeUrl || newGame.url)
                 .setEmoji('🛒'),
             );
+          }
+
+          const newRow = new ActionRowBuilder().addComponents(newButtons);
 
           await i.editReply({ embeds: [newEmbed], components: [newRow] });
           logger.info('New personalized game recommended', { gameName: newGame.name, userId: userId });

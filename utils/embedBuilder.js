@@ -55,8 +55,15 @@ class GameEmbedBuilder {
       });
     }
 
-    // 評価
-    if (gameData.rating) {
+    // 評価（Steam レビュー情報を優先）
+    if (gameData.reviewText && gameData.totalReviews > 0) {
+      const reviewInfo = `${gameData.reviewText} (${gameData.totalReviews.toLocaleString()}件)`;
+      embed.addFields({
+        name: 'Steam評価',
+        value: reviewInfo,
+        inline: true,
+      });
+    } else if (gameData.rating) {
       embed.addFields({
         name: '評価',
         value: gameData.rating.toString(),

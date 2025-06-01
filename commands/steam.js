@@ -73,7 +73,15 @@ module.exports = {
           option
             .setName('最大価格')
             .setDescription('最大価格（円）')
-            .setRequired(true),
+            .setRequired(true)
+            .setMinValue(1),
+        )
+        .addIntegerOption(option =>
+          option
+            .setName('最小価格')
+            .setDescription('最小価格（円）')
+            .setRequired(false)
+            .setMinValue(0),
         ),
     )
     .addSubcommand(subcommand =>

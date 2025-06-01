@@ -1,0 +1,15 @@
+node_modules/
+.env
+.env.local
+.env.production
+.env.test
+cache/*.json
+!cache/.gitkeep
+logs/
+*.log
+.DS_Store
+dist/
+build/
+coverage/
+.vscode/
+.idea/

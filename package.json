@@ -1,0 +1,30 @@
+{
+  "name": "steam-game-suggester-bot",
+  "version": "1.0.0",
+  "description": "A Discord bot that provides Steam game information and recommendations",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node --watch index.js",
+    "start": "node index.js",
+    "test": "jest",
+    "lint": "eslint .",
+    "build": "echo 'No build step required for JavaScript'",
+    "deploy-commands": "node deploy-commands.js"
+  },
+  "keywords": ["discord", "bot", "steam", "game", "recommendation"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.3.1",
+    "axios": "^1.6.2",
+    "string-similarity": "^4.0.4"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "eslint": "^8.55.0"
+  },
+  "engines": {
+    "node": ">=16.9.0"
+  }
+}

@@ -1,0 +1,113 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+title: 開発ガイドライン
+tags: [guideline, development, git, coding-style, security, documentation]
+---
+# 開発ガイドライン
+
+このドキュメントは、Steam Game Suggester Discord Botプロジェクトの開発を円滑に進めるためのルールとガイドラインを定義します。AIによる開発において、これらの方針に従ってください。
+
+## 関連ドキュメント
+- プロジェクト詳細: [project-details.mdc](mdc:.cursor/rules/project-details.mdc)
+- 本開発ルール: [development-guidelines.mdc](mdc:.cursor/rules/rules/development-guidelines.mdc)
+
+## 1. プロジェクト概要
+- **プロジェクト名**: Steam Game Suggester Discord Bot (仮称)
+- **目的**: Discordユーザーに対し、Steamゲームに関する情報提供と発見支援を行う。
+- **スコープ**: [project-details.mdc](mdc:.cursor/rules/project-details.mdc)に記載された機能の実装 (優先度に応じて段階的に)。
+
+## 2. 開発環境とツール
+- **プログラミング言語**: JavaScript (Node.js環境)
+- **Discordライブラリ**: `discord.js` (v13以降推奨、スラッシュコマンドとComponentsのため)
+- **HTTPリクエストライブラリ**: `axios` または `node-fetch`
+- **バージョン管理**: Git
+- **リモートリポジトリ**: GitHub
+- **パッケージマネージャ**: `npm` または `yarn`。[`package-lock.json`](mdc:package-lock.json) または `yarn.lock` を使用します。
+- **リンター/フォーマッター**: `ESLint`, `Prettier` (設定ファイルをリポジトリに含め、統一)
+
+## 3. Git/GitHub 運用ルール
+- **リポジトリ作成**: GitHub上にパブリックリポジトリを作成。
+- 1機能ごとにGit/GitHubの更新を行う
+
+### ブランチ戦略
+- `main` (または `master`): 安定版、デプロイされるブランチ。直接コミットは禁止。
+- `develop`: 現在の開発版。新機能はこのブランチから分岐して開発。
+- `feature/<feature-name>`: 各機能開発用のブランチ (例: `feature/random-suggest`, `feature/search-game`)。`develop` から分岐。
+- `fix/<issue-number-or-description>`: バグ修正用のブランチ。`develop` (または `main` からのhotfix) から分岐。
+
+### コミットメッセージ
+- Conventional Commits 形式を**必ず使用**してください (例: `feat: ランダムおすすめ機能を追加`, `fix: ゲーム検索時のAPIエラーを修正`, `docs: README更新`, `style: フォーマット調整`, `refactor: コード構造改善`, `test: ユニットテスト追加`, `chore: ビルドプロセス更新`)。
+- 変更内容が簡潔にわかるように記述してください。
+
+### プルリクエスト (PR)
+- `feature` ブランチや `fix` ブランチでの作業が完了したら、`develop` ブランチへのマージはプルリクエストを通じて行います。
+- PRには変更内容の概要、関連するIssue番号 (あれば) を記述してください。
+- CI (継続的インテグレーション) ツール (例: GitHub Actions) を設定し、PR作成時に自動テストやリンターチェックを実行します。
+
+### マージ
+- CIがパスしたら、セルフレビューを行い、PRを `develop` にマージします (`Squash and Merge` や `Rebase and Merge` を検討)。
+- **セルフレビューのチェックポイント**:
+    - 変更内容が意図通りであること
+    - テストが追加・更新されていること
+    - ドキュメント ([README.md](mdc:README.md) など) に影響がないか、または適切に更新されているか
+
+### リリース
+- `develop` ブランチが安定し、リリース可能な状態になったら `main` ブランチにマージし、タグ付け (例: `v1.0.0`) してリリースします。
+
+### .gitignore
+- [` .gitignore`](mdc:.gitignore) ファイルを適切に設定し、`node_modules/`, [`.env`](mdc:.env) (もし存在する場合), ログファイル、キャッシュファイルなど、リポジトリに含めるべきでないファイルを指定します。
+
+### 依存関係の固定
+- [`package-lock.json`](mdc:package-lock.json) (または `yarn.lock`) をコミットに含め、依存関係のバージョンを固定します。
+
+## 4. コーディング規約と品質管理
+- **命名規則**: JavaScriptの標準的なキャメルケース (`camelCase`)、クラス名はパスカルケース (`PascalCase`) を使用してください。
+- **コメント**: 適切に記述してください。JSDoc形式の利用も検討します。
+- **モジュール分割**: コマンドごと、ユーティリティ関数ごとなど、適切にファイルを分割してください (`commands/`, `utils/`, `services/` など)。[`index.js`](mdc:index.js) (または `bot.js`) はエントリーポイントとして簡潔に保ちます。
+- **エラーハンドリング**:
+    - Node.jsの慣習に従い、エラーを最初に処理してください。
+    - `async/await` を積極的に活用し、`try...catch` でエラーハンドリングを行ってください。
+    - エラー発生時は、詳細なログ（エラーメッセージ、スタックトレース、発生箇所など）を出力し、デバッグを容易にしてください。
+    - ユーザー起因のエラーの場合は、分かりやすいエラーメッセージをユーザーに表示してください。
+
+## 5. セキュリティ
+### 機密情報の管理
+- Discordボットトークン (例: `DISCORD_BOT_TOKEN`)、APIキー (例: `STEAM_API_KEY`) は [`.env`](mdc:.env) ファイル (もし存在する場合) に記述し、`dotenv` ライブラリで読み込みます。
+- @`.env` ファイルは**必ず** ユーザーが記載します。
+- [`.env`](mdc:.env) ファイルは**必ず** [`.gitignore`](mdc:.gitignore) に追加してください。
+- GitHubリポジトリには @`.env` のようなテンプレートファイルを含め、必要な環境変数を明記してください。
+- デプロイ時はホスティングサービスの環境変数設定機能を使用してください。
+
+## 6. 開発プロセスとマイルストーン案 (Git/GitHub連携)
+- **M0: 環境構築とボット基礎 (GitHubリポジトリ設定)**
+  - GitHubリポジトリ作成、ブランチ戦略設定、[`.gitignore`](mdc:.gitignore) 設定。
+  - `discord.js` セットアップ、トークンを環境変数で読み込み、基本的なスラッシュコマンド登録・応答確認。
+- **M1: コア機能 (`/steam info`) - `feature/search-game` ブランチ**
+  - GetAppList キャッシュ、ゲーム名検索、API連携、Embed表示。
+  - PR作成 → `develop` へマージ。
+- **M2: ランダムおすすめ (`/steam おすすめ`) - `feature/random-suggest` ブランチ**
+  - M1の基盤利用。PR作成 → `develop` へマージ。
+- **M3以降: 各機能 (優先度順) - それぞれ `feature/...` ブランチで開発**
+  - 開発 → PR → `develop` へマージ のサイクルを繰り返します。
+  - 適宜 `develop` ブランチから最新の変更を取り込みます (`git pull origin develop` または `git rebase origin/develop`)。
+- **リリース準備**: `develop` ブランチの機能が揃い、テストが完了したら、`main` へマージするためのPRを作成します。
+- **デプロイ**: `main` ブランチの内容をデプロイします。GitHub Actionsで自動デプロイも検討します。
+
+## 7. テスト方針
+- `Jest` などのテスティングフレームワークを用いたユニットテスト/結合テストを**必ず記述**してください。
+- 特にAPI連携部分や複雑なロジックはテストでカバーしてください。
+- CIでテストを自動実行し、カバレッジレポートも確認します (目標カバレッジ: `xx%` など具体的な目標値も検討)。
+
+## 8. ドキュメンテーション
+- **[README.md](mdc:README.md)**: 詳細かつ最新の状態を保ってください。プロジェクトの目的、主な機能、コマンドの使い方、セットアップ方法、環境変数一覧 ([`.env.example`](mdc:.env.example) の内容を反映) などを記述します。
+
+- **Issueトラッカー**: `GitHub Issues` を活用し、バグ報告、機能要望、タスク管理を行います。

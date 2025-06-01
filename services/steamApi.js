@@ -151,13 +151,16 @@ class SteamApiService {
     return {
       name: gameData.name,
       appId: gameData.steam_appid,
+      id: gameData.steam_appid,
       description: gameData.short_description || gameData.detailed_description?.substring(0, 300) || 'No description available',
       genres: gameData.genres?.map(g => g.description).slice(0, 3) || [],
       price: gameData.is_free ? 'Free' : gameData.price_overview?.final_formatted || 'Price not available',
       originalPrice: gameData.price_overview?.initial_formatted,
       discount: gameData.price_overview?.discount_percent,
       releaseDate: gameData.release_date?.date || 'TBA',
+      image: gameData.header_image,
       headerImage: gameData.header_image,
+      url: `https://store.steampowered.com/app/${gameData.steam_appid}`,
       storeUrl: `https://store.steampowered.com/app/${gameData.steam_appid}`,
       developers: gameData.developers || [],
       publishers: gameData.publishers || [],
@@ -166,6 +169,7 @@ class SteamApiService {
         mac: gameData.platforms?.mac || false,
         linux: gameData.platforms?.linux || false,
       },
+      platform: 'Steam',
     };
   }
 }

@@ -122,17 +122,28 @@ class RawgApiService {
   formatGameForEmbed(rawgGame) {
     if (!rawgGame) {return null;}
 
+    // Steam URLを検索
+    let steamUrl = null;
+    const steamStore = rawgGame.stores?.find(s => s.store.id === 1 || s.store.name === 'Steam');
+    if (steamStore && steamStore.url) {
+      steamUrl = steamStore.url;
+    }
+
     return {
+      id: rawgGame.id,
       name: rawgGame.name,
       description: rawgGame.description_raw || 'No description available',
       genres: rawgGame.genres?.map(g => g.name).slice(0, 3) || [],
       rating: rawgGame.rating ? `${rawgGame.rating}/5.0` : 'Not rated',
       metacritic: rawgGame.metacritic ? `Metacritic: ${rawgGame.metacritic}` : null,
       releaseDate: rawgGame.released || 'TBA',
+      image: rawgGame.background_image,
       headerImage: rawgGame.background_image,
       platforms: rawgGame.platforms?.map(p => p.platform.name) || [],
       stores: rawgGame.stores?.map(s => s.store.name) || [],
       screenshots: rawgGame.short_screenshots?.slice(1, 4).map(s => s.image) || [],
+      url: steamUrl,
+      platform: 'RAWG',
     };
   }
 

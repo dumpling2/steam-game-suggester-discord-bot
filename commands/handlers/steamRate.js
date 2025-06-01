@@ -38,7 +38,15 @@ module.exports = {
       logger.info('ゲーム評価リクエスト:', { userId, gameName, rating });
 
       // Steamでゲームを検索
-      let gameData = await steamApi.searchGame(gameName);
+      const foundApp = await steamApi.searchGameByName(gameName);
+      let gameData = null;
+
+      if (foundApp) {
+        const gameDetails = await steamApi.getAppDetails(foundApp.appid);
+        if (gameDetails) {
+          gameData = steamApi.formatGameDetails(gameDetails);
+        }
+      }
 
       if (!gameData) {
         // RAWGでも検索

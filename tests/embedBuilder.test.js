@@ -18,8 +18,8 @@ describe('GameEmbedBuilder', () => {
         platforms: {
           windows: true,
           mac: true,
-          linux: false
-        }
+          linux: false,
+        },
       };
 
       const embed = GameEmbedBuilder.createGameEmbed(mockGameData);
@@ -29,10 +29,10 @@ describe('GameEmbedBuilder', () => {
       expect(embed.data.color).toBe(EMBED_COLORS.INFO);
       expect(embed.data.description).toBe('A great test game');
       expect(embed.data.image.url).toBe('https://example.com/image.jpg');
-      
+
       const genreField = embed.data.fields.find(f => f.name === 'ジャンル');
       expect(genreField.value).toBe('Action, Adventure');
-      
+
       const priceField = embed.data.fields.find(f => f.name === '価格');
       expect(priceField.value).toContain('¥1,000');
       expect(priceField.value).toContain('50%');
@@ -48,11 +48,11 @@ describe('GameEmbedBuilder', () => {
         price: 'Free',
         releaseDate: 'TBA',
         developers: [],
-        platforms: {}
+        platforms: {},
       };
 
       const embed = GameEmbedBuilder.createGameEmbed(mockGameData);
-      
+
       expect(embed.data.description.length).toBeLessThanOrEqual(303);
       expect(embed.data.description).toContain('...');
     });

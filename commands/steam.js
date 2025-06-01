@@ -18,23 +18,23 @@ module.exports = {
           option
             .setName('ゲーム名')
             .setDescription('検索したいゲームの名前')
-            .setRequired(true)
-        )
+            .setRequired(true),
+        ),
     )
     .addSubcommand(subcommand =>
       subcommand
         .setName('おすすめ')
-        .setDescription('ランダムにゲームをおすすめします')
+        .setDescription('ランダムにゲームをおすすめします'),
     )
     .addSubcommand(subcommand =>
       subcommand
         .setName('random')
-        .setDescription('ランダムにゲームをおすすめします（英語版）')
+        .setDescription('ランダムにゲームをおすすめします（英語版）'),
     )
     .addSubcommand(subcommand =>
       subcommand
         .setName('お得な情報')
-        .setDescription('現在のセール情報を表示します')
+        .setDescription('現在のセール情報を表示します'),
     )
     .addSubcommand(subcommand =>
       subcommand
@@ -55,14 +55,14 @@ module.exports = {
               { name: 'Racing', value: 'racing' },
               { name: 'Puzzle', value: 'puzzle' },
               { name: 'Shooter', value: 'shooter' },
-              { name: 'Indie', value: 'indie' }
-            )
-        )
+              { name: 'Indie', value: 'indie' },
+            ),
+        ),
     )
     .addSubcommand(subcommand =>
       subcommand
         .setName('トップ評価')
-        .setDescription('高評価のゲームをおすすめします')
+        .setDescription('高評価のゲームをおすすめします'),
     )
     .addSubcommand(subcommand =>
       subcommand
@@ -72,13 +72,13 @@ module.exports = {
           option
             .setName('最大価格')
             .setDescription('最大価格（円）')
-            .setRequired(true)
-        )
+            .setRequired(true),
+        ),
     )
     .addSubcommand(subcommand =>
       subcommand
         .setName('free')
-        .setDescription('無料ゲームをおすすめします')
+        .setDescription('無料ゲームをおすすめします'),
     ),
 
   async execute(interaction) {

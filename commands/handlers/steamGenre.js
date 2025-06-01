@@ -7,7 +7,7 @@ const { EMBED_COLORS } = require('../../config/constants');
 
 module.exports = async function handleSteamGenre(interaction) {
   const genre = interaction.options.getString('ジャンル');
-  
+
   await interaction.deferReply();
 
   try {
@@ -40,7 +40,7 @@ module.exports = async function handleSteamGenre(interaction) {
       embed.addFields({
         name: 'ジャンル',
         value: formattedGame.genres.join(', '),
-        inline: true
+        inline: true,
       });
     }
 
@@ -48,7 +48,7 @@ module.exports = async function handleSteamGenre(interaction) {
       embed.addFields({
         name: '評価',
         value: formattedGame.rating,
-        inline: true
+        inline: true,
       });
     }
 
@@ -56,7 +56,7 @@ module.exports = async function handleSteamGenre(interaction) {
       embed.addFields({
         name: 'メタスコア',
         value: formattedGame.metacritic,
-        inline: true
+        inline: true,
       });
     }
 
@@ -64,7 +64,7 @@ module.exports = async function handleSteamGenre(interaction) {
       embed.addFields({
         name: 'リリース日',
         value: formattedGame.releaseDate,
-        inline: true
+        inline: true,
       });
     }
 
@@ -72,7 +72,7 @@ module.exports = async function handleSteamGenre(interaction) {
       embed.addFields({
         name: 'プラットフォーム',
         value: formattedGame.platforms.slice(0, 3).join(', '),
-        inline: true
+        inline: true,
       });
     }
 
@@ -91,7 +91,7 @@ module.exports = async function handleSteamGenre(interaction) {
           embed.addFields({
             name: 'Steam価格',
             value: steamFormatted.price,
-            inline: true
+            inline: true,
           });
         }
       }
@@ -111,7 +111,7 @@ module.exports = async function handleSteamGenre(interaction) {
         .setCustomId('recommend_another_genre')
         .setLabel(`別の${genre}ゲームをおすすめ`)
         .setStyle(ButtonStyle.Primary)
-        .setEmoji('🎲')
+        .setEmoji('🎲'),
     );
 
     if (steamButton) {
@@ -120,14 +120,14 @@ module.exports = async function handleSteamGenre(interaction) {
 
     components.push(row);
 
-    const response = await interaction.editReply({ 
-      embeds: [embed], 
-      components: components 
+    const response = await interaction.editReply({
+      embeds: [embed],
+      components: components,
     });
 
-    const collector = response.createMessageComponentCollector({ 
+    const collector = response.createMessageComponentCollector({
       filter: i => i.customId === 'recommend_another_genre',
-      time: 300000
+      time: 300000,
     });
 
     collector.on('collect', async i => {
@@ -140,10 +140,10 @@ module.exports = async function handleSteamGenre(interaction) {
 
       try {
         const newGame = await rawgApi.getRandomGameByGenre(genre);
-        
+
         if (newGame) {
           const newFormattedGame = rawgApi.formatGameForEmbed(newGame);
-          
+
           const newEmbed = new EmbedBuilder()
             .setTitle(newFormattedGame.name)
             .setDescription(newFormattedGame.description.substring(0, 300) + (newFormattedGame.description.length > 300 ? '...' : ''))
@@ -156,7 +156,7 @@ module.exports = async function handleSteamGenre(interaction) {
             newEmbed.addFields({
               name: 'ジャンル',
               value: newFormattedGame.genres.join(', '),
-              inline: true
+              inline: true,
             });
           }
 
@@ -164,7 +164,7 @@ module.exports = async function handleSteamGenre(interaction) {
             newEmbed.addFields({
               name: '評価',
               value: newFormattedGame.rating,
-              inline: true
+              inline: true,
             });
           }
 
@@ -172,7 +172,7 @@ module.exports = async function handleSteamGenre(interaction) {
             newEmbed.addFields({
               name: 'リリース日',
               value: newFormattedGame.releaseDate,
-              inline: true
+              inline: true,
             });
           }
 
@@ -184,19 +184,19 @@ module.exports = async function handleSteamGenre(interaction) {
               .setCustomId('recommend_another_genre')
               .setLabel(`別の${genre}ゲームをおすすめ`)
               .setStyle(ButtonStyle.Primary)
-              .setEmoji('🎲')
+              .setEmoji('🎲'),
           );
 
           if (newSteamInfo && newSteamInfo.appId) {
             const newSteamUrl = `https://store.steampowered.com/app/${newSteamInfo.appId}`;
             newEmbed.setURL(newSteamUrl);
-            
+
             newRow.addComponents(
               new ButtonBuilder()
                 .setLabel('Steamストアで見る')
                 .setStyle(ButtonStyle.Link)
                 .setURL(newSteamUrl)
-                .setEmoji('🛒')
+                .setEmoji('🛒'),
             );
           }
 
@@ -207,18 +207,18 @@ module.exports = async function handleSteamGenre(interaction) {
       }
     });
 
-    logger.info('Genre game recommendation sent', { 
+    logger.info('Genre game recommendation sent', {
       gameName: formattedGame.name,
-      genre: genre
+      genre: genre,
     });
 
   } catch (error) {
     logger.error('Error in steam genre command', error);
-    
+
     const errorEmbed = GameEmbedBuilder.createErrorEmbed(
-      'ジャンル検索中にエラーが発生しました。しばらくしてからもう一度お試しください。'
+      'ジャンル検索中にエラーが発生しました。しばらくしてからもう一度お試しください。',
     );
-    
+
     await interaction.editReply({ embeds: [errorEmbed] });
   }
 };

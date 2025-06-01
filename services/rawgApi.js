@@ -1,15 +1,28 @@
-const axios = require('axios');
 const logger = require('../utils/logger');
+const { createRateLimitedClient } = require('../utils/httpClient');
 const { RAWG_API_BASE_URL, API_TIMEOUT } = require('../config/constants');
 
 class RawgApiService {
   constructor() {
     this.apiKey = process.env.RAWG_API_KEY;
+
+    // リトライ機能付きHTTPクライアントを作成
+    this.httpClient = createRateLimitedClient(
+      {
+        timeout: parseInt(process.env.API_TIMEOUT || API_TIMEOUT, 10),
+        retries: 3,
+        retryDelay: 1000,
+      },
+      {
+        maxRequestsPerSecond: 10,
+        maxRequestsPerMinute: 100,
+      },
+    );
   }
 
   async searchGames(params = {}) {
     try {
-      const response = await axios.get(`${RAWG_API_BASE_URL}/games`, {
+      const response = await this.httpClient.get(`${RAWG_API_BASE_URL}/games`, {
         params: {
           key: this.apiKey,
           page_size: params.pageSize || 20,
@@ -19,9 +32,8 @@ class RawgApiService {
           tags: params.tags,
           ordering: params.ordering,
           metacritic: params.metacritic,
-          ...params
+          ...params,
         },
-        timeout: API_TIMEOUT,
       });
 
       return response.data;
@@ -33,11 +45,10 @@ class RawgApiService {
 
   async getGameDetails(gameId) {
     try {
-      const response = await axios.get(`${RAWG_API_BASE_URL}/games/${gameId}`, {
+      const response = await this.httpClient.get(`${RAWG_API_BASE_URL}/games/${gameId}`, {
         params: {
           key: this.apiKey,
         },
-        timeout: API_TIMEOUT,
       });
 
       return response.data;
@@ -49,11 +60,10 @@ class RawgApiService {
 
   async getGenres() {
     try {
-      const response = await axios.get(`${RAWG_API_BASE_URL}/genres`, {
+      const response = await this.httpClient.get(`${RAWG_API_BASE_URL}/genres`, {
         params: {
           key: this.apiKey,
         },
-        timeout: API_TIMEOUT,
       });
 
       return response.data.results;
@@ -75,7 +85,7 @@ class RawgApiService {
       }
 
       const randomPage = Math.floor(Math.random() * Math.min(500, totalGames.count)) + 1;
-      
+
       const response = await this.searchGames({
         genres: genreSlug,
         page_size: 1,
@@ -98,8 +108,8 @@ class RawgApiService {
         page_size: 40,
       });
 
-      const filteredGames = response.results.filter(game => 
-        game.rating >= minRating && game.ratings_count > 50
+      const filteredGames = response.results.filter(game =>
+        game.rating >= minRating && game.ratings_count > 50,
       );
 
       return filteredGames;
@@ -110,7 +120,7 @@ class RawgApiService {
   }
 
   formatGameForEmbed(rawgGame) {
-    if (!rawgGame) return null;
+    if (!rawgGame) {return null;}
 
     return {
       name: rawgGame.name,
@@ -137,7 +147,7 @@ class RawgApiService {
       if (response.results && response.results.length > 0) {
         const game = response.results[0];
         const steamStore = game.stores?.find(s => s.store.id === 1);
-        
+
         if (steamStore && steamStore.url) {
           const steamIdMatch = steamStore.url.match(/\/app\/(\d+)/);
           if (steamIdMatch) {

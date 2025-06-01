@@ -28,7 +28,7 @@ module.exports = async function handleSteamSale(interaction) {
 
     for (const deal of dealsToShow) {
       const formattedDeal = itadApi.formatDealForEmbed(deal);
-      
+
       const embed = new EmbedBuilder()
         .setTitle(formattedDeal.title)
         .setColor(EMBED_COLORS.SUCCESS)
@@ -36,18 +36,18 @@ module.exports = async function handleSteamSale(interaction) {
           {
             name: '現在の価格',
             value: formattedDeal.currentPrice,
-            inline: true
+            inline: true,
           },
           {
             name: '元の価格',
             value: formattedDeal.originalPrice || 'N/A',
-            inline: true
+            inline: true,
           },
           {
             name: '割引率',
             value: `-${formattedDeal.discount}`,
-            inline: true
-          }
+            inline: true,
+          },
         )
         .setFooter({ text: 'Data from IsThereAnyDeal' });
 
@@ -70,17 +70,17 @@ module.exports = async function handleSteamSale(interaction) {
           .setCustomId('refresh_deals')
           .setLabel('他のセールを見る')
           .setStyle(ButtonStyle.Primary)
-          .setEmoji('🔄')
+          .setEmoji('🔄'),
       );
 
-    const response = await interaction.editReply({ 
+    const response = await interaction.editReply({
       embeds: [mainEmbed, ...embeds],
-      components: [row]
+      components: [row],
     });
 
     const collector = response.createMessageComponentCollector({
       filter: i => i.customId === 'refresh_deals',
-      time: 300000
+      time: 300000,
     });
 
     collector.on('collect', async i => {
@@ -100,7 +100,7 @@ module.exports = async function handleSteamSale(interaction) {
 
         for (const deal of newDealsToShow) {
           const formattedDeal = itadApi.formatDealForEmbed(deal);
-          
+
           const embed = new EmbedBuilder()
             .setTitle(formattedDeal.title)
             .setColor(EMBED_COLORS.SUCCESS)
@@ -108,18 +108,18 @@ module.exports = async function handleSteamSale(interaction) {
               {
                 name: '現在の価格',
                 value: formattedDeal.currentPrice,
-                inline: true
+                inline: true,
               },
               {
                 name: '元の価格',
                 value: formattedDeal.originalPrice || 'N/A',
-                inline: true
+                inline: true,
               },
               {
                 name: '割引率',
                 value: `-${formattedDeal.discount}`,
-                inline: true
-              }
+                inline: true,
+              },
             )
             .setFooter({ text: 'Data from IsThereAnyDeal' });
 
@@ -142,7 +142,7 @@ module.exports = async function handleSteamSale(interaction) {
     logger.error('Error in steam sale command', error);
 
     const errorEmbed = GameEmbedBuilder.createErrorEmbed(
-      'セール情報の取得中にエラーが発生しました。しばらくしてからもう一度お試しください。'
+      'セール情報の取得中にエラーが発生しました。しばらくしてからもう一度お試しください。',
     );
 
     await interaction.editReply({ embeds: [errorEmbed] });

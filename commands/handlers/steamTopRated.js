@@ -40,21 +40,21 @@ module.exports = async function handleSteamTopRated(interaction) {
       embed.addFields({
         name: 'ジャンル',
         value: formattedGame.genres.join(', '),
-        inline: true
+        inline: true,
       });
     }
 
     embed.addFields({
       name: '評価',
       value: `⭐ ${formattedGame.rating}`,
-      inline: true
+      inline: true,
     });
 
     if (formattedGame.metacritic) {
       embed.addFields({
         name: 'メタスコア',
         value: formattedGame.metacritic,
-        inline: true
+        inline: true,
       });
     }
 
@@ -62,7 +62,7 @@ module.exports = async function handleSteamTopRated(interaction) {
       embed.addFields({
         name: 'リリース日',
         value: formattedGame.releaseDate,
-        inline: true
+        inline: true,
       });
     }
 
@@ -70,7 +70,7 @@ module.exports = async function handleSteamTopRated(interaction) {
       embed.addFields({
         name: 'レビュー数',
         value: `${selectedGame.ratings_count.toLocaleString()} 件`,
-        inline: true
+        inline: true,
       });
     }
 
@@ -88,7 +88,7 @@ module.exports = async function handleSteamTopRated(interaction) {
           embed.addFields({
             name: 'Steam価格',
             value: steamFormatted.price,
-            inline: true
+            inline: true,
           });
         }
       }
@@ -101,27 +101,27 @@ module.exports = async function handleSteamTopRated(interaction) {
     }
 
     const row = new ActionRowBuilder();
-    
+
     row.addComponents(
       new ButtonBuilder()
         .setCustomId('recommend_another_top')
         .setLabel('別の高評価ゲームをおすすめ')
         .setStyle(ButtonStyle.Primary)
-        .setEmoji('⭐')
+        .setEmoji('⭐'),
     );
 
     if (steamButton) {
       row.addComponents(steamButton);
     }
 
-    const response = await interaction.editReply({ 
-      embeds: [embed], 
-      components: [row] 
+    const response = await interaction.editReply({
+      embeds: [embed],
+      components: [row],
     });
 
-    const collector = response.createMessageComponentCollector({ 
+    const collector = response.createMessageComponentCollector({
       filter: i => i.customId === 'recommend_another_top',
-      time: 300000
+      time: 300000,
     });
 
     collector.on('collect', async i => {
@@ -136,7 +136,7 @@ module.exports = async function handleSteamTopRated(interaction) {
         const newRandomIndex = Math.floor(Math.random() * topRatedGames.length);
         const newSelectedGame = topRatedGames[newRandomIndex];
         const newFormattedGame = rawgApi.formatGameForEmbed(newSelectedGame);
-        
+
         const newEmbed = new EmbedBuilder()
           .setTitle(`⭐ ${newFormattedGame.name}`)
           .setDescription(newFormattedGame.description.substring(0, 300) + (newFormattedGame.description.length > 300 ? '...' : ''))
@@ -149,21 +149,21 @@ module.exports = async function handleSteamTopRated(interaction) {
           newEmbed.addFields({
             name: 'ジャンル',
             value: newFormattedGame.genres.join(', '),
-            inline: true
+            inline: true,
           });
         }
 
         newEmbed.addFields({
           name: '評価',
           value: `⭐ ${newFormattedGame.rating}`,
-          inline: true
+          inline: true,
         });
 
         if (newFormattedGame.metacritic) {
           newEmbed.addFields({
             name: 'メタスコア',
             value: newFormattedGame.metacritic,
-            inline: true
+            inline: true,
           });
         }
 
@@ -171,7 +171,7 @@ module.exports = async function handleSteamTopRated(interaction) {
           newEmbed.addFields({
             name: 'リリース日',
             value: newFormattedGame.releaseDate,
-            inline: true
+            inline: true,
           });
         }
 
@@ -179,7 +179,7 @@ module.exports = async function handleSteamTopRated(interaction) {
           newEmbed.addFields({
             name: 'レビュー数',
             value: `${newSelectedGame.ratings_count.toLocaleString()} 件`,
-            inline: true
+            inline: true,
           });
         }
 
@@ -191,13 +191,13 @@ module.exports = async function handleSteamTopRated(interaction) {
             .setCustomId('recommend_another_top')
             .setLabel('別の高評価ゲームをおすすめ')
             .setStyle(ButtonStyle.Primary)
-            .setEmoji('⭐')
+            .setEmoji('⭐'),
         );
 
         if (newSteamInfo && newSteamInfo.appId) {
           const newSteamUrl = `https://store.steampowered.com/app/${newSteamInfo.appId}`;
           newEmbed.setURL(newSteamUrl);
-          
+
           const steamDetails = await steamApi.getAppDetails(newSteamInfo.appId);
           if (steamDetails) {
             const steamFormatted = steamApi.formatGameDetails(steamDetails);
@@ -209,18 +209,18 @@ module.exports = async function handleSteamTopRated(interaction) {
                 newEmbed.addFields({
                   name: 'Steam価格',
                   value: steamFormatted.price,
-                  inline: true
+                  inline: true,
                 });
               }
             }
           }
-          
+
           newRow.addComponents(
             new ButtonBuilder()
               .setLabel('Steamストアで見る')
               .setStyle(ButtonStyle.Link)
               .setURL(newSteamUrl)
-              .setEmoji('🛒')
+              .setEmoji('🛒'),
           );
         }
 
@@ -230,18 +230,18 @@ module.exports = async function handleSteamTopRated(interaction) {
       }
     });
 
-    logger.info('Top rated game recommendation sent', { 
+    logger.info('Top rated game recommendation sent', {
       gameName: formattedGame.name,
-      rating: formattedGame.rating
+      rating: formattedGame.rating,
     });
 
   } catch (error) {
     logger.error('Error in steam top rated command', error);
-    
+
     const errorEmbed = GameEmbedBuilder.createErrorEmbed(
-      '高評価ゲームの取得中にエラーが発生しました。しばらくしてからもう一度お試しください。'
+      '高評価ゲームの取得中にエラーが発生しました。しばらくしてからもう一度お試しください。',
     );
-    
+
     await interaction.editReply({ embeds: [errorEmbed] });
   }
 };

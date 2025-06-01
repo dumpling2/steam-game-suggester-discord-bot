@@ -21,7 +21,7 @@ class GameEmbedBuilder {
       embed.addFields({
         name: 'ジャンル',
         value: gameData.genres.join(', '),
-        inline: true
+        inline: true,
       });
     }
 
@@ -32,33 +32,33 @@ class GameEmbedBuilder {
     embed.addFields({
       name: '価格',
       value: priceText,
-      inline: true
+      inline: true,
     });
 
     embed.addFields({
       name: 'リリース日',
       value: gameData.releaseDate,
-      inline: true
+      inline: true,
     });
 
     if (gameData.developers && gameData.developers.length > 0) {
       embed.addFields({
         name: '開発元',
         value: gameData.developers.join(', '),
-        inline: true
+        inline: true,
       });
     }
 
     const platforms = [];
-    if (gameData.platforms.windows) platforms.push('Windows');
-    if (gameData.platforms.mac) platforms.push('Mac');
-    if (gameData.platforms.linux) platforms.push('Linux');
-    
+    if (gameData.platforms.windows) {platforms.push('Windows');}
+    if (gameData.platforms.mac) {platforms.push('Mac');}
+    if (gameData.platforms.linux) {platforms.push('Linux');}
+
     if (platforms.length > 0) {
       embed.addFields({
         name: 'プラットフォーム',
         value: platforms.join(', '),
-        inline: true
+        inline: true,
       });
     }
 

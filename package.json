@@ -7,6 +7,7 @@
     "dev": "node --watch index.js",
     "start": "node index.js",
     "test": "jest",
+    "test:coverage": "jest --coverage",
     "lint": "eslint .",
     "build": "echo 'No build step required for JavaScript'",
     "deploy-commands": "node deploy-commands.js"

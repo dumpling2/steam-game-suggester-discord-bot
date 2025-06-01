@@ -8,7 +8,7 @@ const { EMBED_COLORS } = require('../../config/constants');
 module.exports = async function handleSteamPrice(interaction, maxPrice) {
   const price = maxPrice ?? interaction.options.getInteger('最大価格');
   const isFree = price === 0;
-  
+
   await interaction.deferReply();
 
   try {
@@ -45,7 +45,7 @@ module.exports = async function handleSteamPrice(interaction, maxPrice) {
     embed.addFields({
       name: '現在の価格',
       value: formattedDeal.currentPrice,
-      inline: true
+      inline: true,
     });
 
     if (formattedDeal.originalPrice && formattedDeal.discount) {
@@ -53,37 +53,37 @@ module.exports = async function handleSteamPrice(interaction, maxPrice) {
         {
           name: '元の価格',
           value: formattedDeal.originalPrice,
-          inline: true
+          inline: true,
         },
         {
           name: '割引率',
           value: `-${formattedDeal.discount}`,
-          inline: true
-        }
+          inline: true,
+        },
       );
     }
 
     const rawgSearch = await rawgApi.searchSteamGame(formattedDeal.title);
     if (rawgSearch && rawgSearch.rawgData) {
       const rawgFormatted = rawgApi.formatGameForEmbed(rawgSearch.rawgData);
-      
+
       if (rawgFormatted.headerImage) {
         embed.setImage(rawgFormatted.headerImage);
       }
-      
+
       if (rawgFormatted.genres.length > 0) {
         embed.addFields({
           name: 'ジャンル',
           value: rawgFormatted.genres.join(', '),
-          inline: true
+          inline: true,
         });
       }
-      
+
       if (rawgFormatted.rating) {
         embed.addFields({
           name: '評価',
           value: rawgFormatted.rating,
-          inline: true
+          inline: true,
         });
       }
     }
@@ -95,7 +95,7 @@ module.exports = async function handleSteamPrice(interaction, maxPrice) {
           .setCustomId('recommend_another_price')
           .setLabel(`別の${priceText}ゲームをおすすめ`)
           .setStyle(ButtonStyle.Primary)
-          .setEmoji('🎲')
+          .setEmoji('🎲'),
       );
 
     if (formattedDeal.dealUrl) {
@@ -104,18 +104,18 @@ module.exports = async function handleSteamPrice(interaction, maxPrice) {
           .setLabel('ストアで見る')
           .setStyle(ButtonStyle.Link)
           .setURL(formattedDeal.dealUrl)
-          .setEmoji('🛒')
+          .setEmoji('🛒'),
       );
     }
 
-    const response = await interaction.editReply({ 
-      embeds: [embed], 
-      components: [row] 
+    const response = await interaction.editReply({
+      embeds: [embed],
+      components: [row],
     });
 
-    const collector = response.createMessageComponentCollector({ 
+    const collector = response.createMessageComponentCollector({
       filter: i => i.customId === 'recommend_another_price',
-      time: 300000
+      time: 300000,
     });
 
     collector.on('collect', async i => {
@@ -144,7 +144,7 @@ module.exports = async function handleSteamPrice(interaction, maxPrice) {
         newEmbed.addFields({
           name: '現在の価格',
           value: newFormattedDeal.currentPrice,
-          inline: true
+          inline: true,
         });
 
         if (newFormattedDeal.originalPrice && newFormattedDeal.discount) {
@@ -152,29 +152,29 @@ module.exports = async function handleSteamPrice(interaction, maxPrice) {
             {
               name: '元の価格',
               value: newFormattedDeal.originalPrice,
-              inline: true
+              inline: true,
             },
             {
               name: '割引率',
               value: `-${newFormattedDeal.discount}`,
-              inline: true
-            }
+              inline: true,
+            },
           );
         }
 
         const newRawgSearch = await rawgApi.searchSteamGame(newFormattedDeal.title);
         if (newRawgSearch && newRawgSearch.rawgData) {
           const newRawgFormatted = rawgApi.formatGameForEmbed(newRawgSearch.rawgData);
-          
+
           if (newRawgFormatted.headerImage) {
             newEmbed.setImage(newRawgFormatted.headerImage);
           }
-          
+
           if (newRawgFormatted.genres.length > 0) {
             newEmbed.addFields({
               name: 'ジャンル',
               value: newRawgFormatted.genres.join(', '),
-              inline: true
+              inline: true,
             });
           }
         }
@@ -185,7 +185,7 @@ module.exports = async function handleSteamPrice(interaction, maxPrice) {
               .setCustomId('recommend_another_price')
               .setLabel(`別の${priceText}ゲームをおすすめ`)
               .setStyle(ButtonStyle.Primary)
-              .setEmoji('🎲')
+              .setEmoji('🎲'),
           );
 
         if (newFormattedDeal.dealUrl) {
@@ -194,7 +194,7 @@ module.exports = async function handleSteamPrice(interaction, maxPrice) {
               .setLabel('ストアで見る')
               .setStyle(ButtonStyle.Link)
               .setURL(newFormattedDeal.dealUrl)
-              .setEmoji('🛒')
+              .setEmoji('🛒'),
           );
         }
 
@@ -204,18 +204,18 @@ module.exports = async function handleSteamPrice(interaction, maxPrice) {
       }
     });
 
-    logger.info('Price-based game recommendation sent', { 
+    logger.info('Price-based game recommendation sent', {
       gameName: formattedDeal.title,
-      price: formattedDeal.currentPrice
+      price: formattedDeal.currentPrice,
     });
 
   } catch (error) {
     logger.error('Error in steam price command', error);
-    
+
     const errorEmbed = GameEmbedBuilder.createErrorEmbed(
-      '価格検索中にエラーが発生しました。しばらくしてからもう一度お試しください。'
+      '価格検索中にエラーが発生しました。しばらくしてからもう一度お試しください。',
     );
-    
+
     await interaction.editReply({ embeds: [errorEmbed] });
   }
 };

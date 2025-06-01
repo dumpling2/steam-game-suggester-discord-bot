@@ -12,7 +12,7 @@ describe('SteamApiService', () => {
         price_overview: {
           final_formatted: '¥1,000',
           initial_formatted: '¥2,000',
-          discount_percent: 50
+          discount_percent: 50,
         },
         release_date: { date: '2024-01-01' },
         header_image: 'https://example.com/image.jpg',
@@ -21,8 +21,8 @@ describe('SteamApiService', () => {
         platforms: {
           windows: true,
           mac: false,
-          linux: true
-        }
+          linux: true,
+        },
       };
 
       const formatted = steamApi.formatGameDetails(mockGameData);
@@ -43,8 +43,8 @@ describe('SteamApiService', () => {
         platforms: {
           windows: true,
           mac: false,
-          linux: true
-        }
+          linux: true,
+        },
       });
     });
 
@@ -53,7 +53,7 @@ describe('SteamApiService', () => {
         name: 'Free Game',
         steam_appid: 99999,
         is_free: true,
-        platforms: {}
+        platforms: {},
       };
 
       const formatted = steamApi.formatGameDetails(mockFreeGame);
@@ -65,7 +65,7 @@ describe('SteamApiService', () => {
     it('should handle missing data gracefully', () => {
       const minimalGame = {
         name: 'Minimal Game',
-        steam_appid: 11111
+        steam_appid: 11111,
       };
 
       const formatted = steamApi.formatGameDetails(minimalGame);

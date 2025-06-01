@@ -15,10 +15,10 @@ class Logger {
       timestamp,
       level,
       message,
-      ...metadata
+      ...metadata,
     };
 
-    console.log(`[${timestamp}] [${level}] ${message}`, metadata);
+    console.log(`[${timestamp}] [${level}] ${message}`, metadata); // eslint-disable-line no-console
 
     const logFile = path.join(this.logsDir, `${new Date().toISOString().split('T')[0]}.log`);
     fs.appendFileSync(logFile, JSON.stringify(logEntry) + '\n');
@@ -32,7 +32,7 @@ class Logger {
     this.log('ERROR', message, {
       ...metadata,
       error: error?.message || error,
-      stack: error?.stack
+      stack: error?.stack,
     });
   }
 

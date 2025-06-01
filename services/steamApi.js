@@ -1,7 +1,8 @@
-const axios = require('axios');
 const fs = require('fs').promises;
 const path = require('path');
 const logger = require('../utils/logger');
+const { createRateLimitedClient } = require('../utils/httpClient');
+const CacheManager = require('../utils/cacheManager');
 const { STEAM_API_BASE_URL, CACHE_DURATION, API_TIMEOUT } = require('../config/constants');
 
 class SteamApiService {
@@ -10,15 +11,31 @@ class SteamApiService {
     this.cacheDir = path.join(__dirname, '..', 'cache');
     this.appListCache = null;
     this.appListCacheTime = null;
+    
+    // キャッシュマネージャーを初期化
+    this.cacheManager = new CacheManager(this.cacheDir);
+
+    // リトライ機能付きHTTPクライアントを作成
+    this.httpClient = createRateLimitedClient(
+      {
+        timeout: parseInt(process.env.API_TIMEOUT || API_TIMEOUT, 10),
+        retries: 3,
+        retryDelay: 1000,
+      },
+      {
+        maxRequestsPerSecond: 5,
+        maxRequestsPerMinute: 50,
+      },
+    );
   }
 
   async getAppList() {
     const cacheFile = path.join(this.cacheDir, 'steam_app_list.json');
-    
+
     try {
       const stats = await fs.stat(cacheFile);
       const cacheAge = Date.now() - stats.mtimeMs;
-      
+
       if (cacheAge < CACHE_DURATION.STEAM_APP_LIST) {
         const cachedData = await fs.readFile(cacheFile, 'utf8');
         this.appListCache = JSON.parse(cachedData);
@@ -30,16 +47,14 @@ class SteamApiService {
     }
 
     try {
-      const response = await axios.get(`${STEAM_API_BASE_URL}/ISteamApps/GetAppList/v2/`, {
-        timeout: API_TIMEOUT,
-      });
+      const response = await this.httpClient.get(`${STEAM_API_BASE_URL}/ISteamApps/GetAppList/v2/`);
 
       if (response.data && response.data.applist && response.data.applist.apps) {
         this.appListCache = response.data.applist.apps;
-        
+
         await fs.writeFile(cacheFile, JSON.stringify(this.appListCache), 'utf8');
         logger.info('Fetched and cached Steam app list', { count: this.appListCache.length });
-        
+
         return this.appListCache;
       }
     } catch (error) {
@@ -49,23 +64,34 @@ class SteamApiService {
   }
 
   async getAppDetails(appId, language = 'japanese') {
+    const cacheKey = `steam_app_${appId}_${language}`;
+    
+    // キャッシュから取得を試みる
+    const cachedData = await this.cacheManager.get(cacheKey);
+    if (cachedData) {
+      logger.info('App details loaded from cache', { appId });
+      return cachedData;
+    }
+
     try {
-      const response = await axios.get('https://store.steampowered.com/api/appdetails', {
+      const response = await this.httpClient.get('https://store.steampowered.com/api/appdetails', {
         params: {
           appids: appId,
           l: language,
         },
-        timeout: API_TIMEOUT,
       });
 
       if (response.data && response.data[appId]) {
         const data = response.data[appId];
-        
+
         if (!data.success) {
           logger.warn('App details request unsuccessful', { appId });
           return null;
         }
 
+        // キャッシュに保存
+        await this.cacheManager.set(cacheKey, data.data, CACHE_DURATION.GAME_DETAILS);
+        
         return data.data;
       }
     } catch (error) {
@@ -76,29 +102,29 @@ class SteamApiService {
 
   async searchGameByName(gameName) {
     const appList = await this.getAppList();
-    
+
     const normalizedSearchTerm = gameName.toLowerCase().trim();
-    
-    const exactMatch = appList.find(app => 
-      app.name.toLowerCase() === normalizedSearchTerm
+
+    const exactMatch = appList.find(app =>
+      app.name.toLowerCase() === normalizedSearchTerm,
     );
-    
+
     if (exactMatch) {
       return exactMatch;
     }
 
-    const partialMatches = appList.filter(app => 
-      app.name.toLowerCase().includes(normalizedSearchTerm)
+    const partialMatches = appList.filter(app =>
+      app.name.toLowerCase().includes(normalizedSearchTerm),
     );
 
     if (partialMatches.length > 0) {
       partialMatches.sort((a, b) => {
         const aStartsWith = a.name.toLowerCase().startsWith(normalizedSearchTerm);
         const bStartsWith = b.name.toLowerCase().startsWith(normalizedSearchTerm);
-        
-        if (aStartsWith && !bStartsWith) return -1;
-        if (!aStartsWith && bStartsWith) return 1;
-        
+
+        if (aStartsWith && !bStartsWith) {return -1;}
+        if (!aStartsWith && bStartsWith) {return 1;}
+
         return a.name.length - b.name.length;
       });
 
@@ -110,7 +136,7 @@ class SteamApiService {
 
   async getRandomGame() {
     const appList = await this.getAppList();
-    
+
     if (!appList || appList.length === 0) {
       throw new Error('ゲームリストが空です');
     }
@@ -120,7 +146,7 @@ class SteamApiService {
   }
 
   formatGameDetails(gameData) {
-    if (!gameData) return null;
+    if (!gameData) {return null;}
 
     return {
       name: gameData.name,

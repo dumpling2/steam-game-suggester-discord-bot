@@ -1,15 +1,28 @@
-const axios = require('axios');
 const logger = require('../utils/logger');
+const { createRateLimitedClient } = require('../utils/httpClient');
 const { ITAD_API_BASE_URL, API_TIMEOUT } = require('../config/constants');
 
 class ItadApiService {
   constructor() {
     this.apiKey = process.env.ITAD_API_KEY;
+
+    // リトライ機能付きHTTPクライアントを作成
+    this.httpClient = createRateLimitedClient(
+      {
+        timeout: parseInt(process.env.API_TIMEOUT || API_TIMEOUT, 10),
+        retries: 3,
+        retryDelay: 1000,
+      },
+      {
+        maxRequestsPerSecond: 5,
+        maxRequestsPerMinute: 60,
+      },
+    );
   }
 
   async getCurrentDeals(options = {}) {
     try {
-      const response = await axios.get(`${ITAD_API_BASE_URL}/deals/v01/list`, {
+      const response = await this.httpClient.get(`${ITAD_API_BASE_URL}/deals/v01/list`, {
         params: {
           key: this.apiKey,
           country: 'JP',
@@ -18,7 +31,6 @@ class ItadApiService {
           offset: options.offset || 0,
           sort: options.sort || 'price:asc',
         },
-        timeout: API_TIMEOUT,
       });
 
       return response.data;
@@ -30,14 +42,13 @@ class ItadApiService {
 
   async getGamePrices(gamePlainName) {
     try {
-      const response = await axios.get(`${ITAD_API_BASE_URL}/game/prices`, {
+      const response = await this.httpClient.get(`${ITAD_API_BASE_URL}/game/prices`, {
         params: {
           key: this.apiKey,
           plains: gamePlainName,
           country: 'JP',
           shops: 'steam',
         },
-        timeout: API_TIMEOUT,
       });
 
       return response.data;
@@ -49,13 +60,12 @@ class ItadApiService {
 
   async searchGame(gameName) {
     try {
-      const response = await axios.get(`${ITAD_API_BASE_URL}/search/search`, {
+      const response = await this.httpClient.get(`${ITAD_API_BASE_URL}/search/search`, {
         params: {
           key: this.apiKey,
           q: gameName,
           limit: 5,
         },
-        timeout: API_TIMEOUT,
       });
 
       return response.data;
@@ -67,7 +77,7 @@ class ItadApiService {
 
   async getTopDeals(minDiscount = 50) {
     try {
-      const response = await axios.get(`${ITAD_API_BASE_URL}/deals/v01/list`, {
+      const response = await this.httpClient.get(`${ITAD_API_BASE_URL}/deals/v01/list`, {
         params: {
           key: this.apiKey,
           country: 'JP',
@@ -75,7 +85,6 @@ class ItadApiService {
           limit: 50,
           sort: 'cut:desc',
         },
-        timeout: API_TIMEOUT,
       });
 
       if (response.data && response.data.list) {
@@ -105,9 +114,8 @@ class ItadApiService {
         params.price_max = maxPrice;
       }
 
-      const response = await axios.get(`${ITAD_API_BASE_URL}/deals/v01/list`, {
+      const response = await this.httpClient.get(`${ITAD_API_BASE_URL}/deals/v01/list`, {
         params,
-        timeout: API_TIMEOUT,
       });
 
       return response.data.list || [];
@@ -118,7 +126,7 @@ class ItadApiService {
   }
 
   formatDealForEmbed(deal) {
-    if (!deal) return null;
+    if (!deal) {return null;}
 
     const originalPrice = deal.price_old || deal.price_new;
     const currentPrice = deal.price_new;

@@ -16,7 +16,7 @@ module.exports = async function handleSteamRecommend(interaction) {
         logger.debug('Random game selected', { appName: randomApp.name, appId: randomApp.appid });
 
         const gameDetails = await steamApi.getAppDetails(randomApp.appid);
-        
+
         if (gameDetails && gameDetails.type === 'game') {
           return steamApi.formatGameDetails(gameDetails);
         }
@@ -38,7 +38,7 @@ module.exports = async function handleSteamRecommend(interaction) {
 
     if (!formattedGame) {
       const errorEmbed = GameEmbedBuilder.createErrorEmbed(
-        'ゲーム情報を取得できませんでした。もう一度お試しください。'
+        'ゲーム情報を取得できませんでした。もう一度お試しください。',
       );
       await interaction.editReply({ embeds: [errorEmbed] });
       return;
@@ -57,17 +57,17 @@ module.exports = async function handleSteamRecommend(interaction) {
           .setLabel('Steamストアで見る')
           .setStyle(ButtonStyle.Link)
           .setURL(formattedGame.storeUrl)
-          .setEmoji('🛒')
+          .setEmoji('🛒'),
       );
 
-    const response = await interaction.editReply({ 
-      embeds: [gameEmbed], 
-      components: [row] 
+    const response = await interaction.editReply({
+      embeds: [gameEmbed],
+      components: [row],
     });
 
-    const collector = response.createMessageComponentCollector({ 
+    const collector = response.createMessageComponentCollector({
       filter: i => i.customId === 'recommend_another',
-      time: 300000 // 5 minutes
+      time: 300000, // 5 minutes
     });
 
     collector.on('collect', async i => {
@@ -79,7 +79,7 @@ module.exports = async function handleSteamRecommend(interaction) {
       await i.deferUpdate();
 
       const newGame = await getRandomGameWithDetails();
-      
+
       if (newGame) {
         const newEmbed = GameEmbedBuilder.createGameEmbed(newGame);
         const newRow = new ActionRowBuilder()
@@ -93,7 +93,7 @@ module.exports = async function handleSteamRecommend(interaction) {
               .setLabel('Steamストアで見る')
               .setStyle(ButtonStyle.Link)
               .setURL(newGame.storeUrl)
-              .setEmoji('🛒')
+              .setEmoji('🛒'),
           );
 
         await i.editReply({ embeds: [newEmbed], components: [newRow] });
@@ -105,18 +105,18 @@ module.exports = async function handleSteamRecommend(interaction) {
       logger.debug('Button collector ended');
     });
 
-    logger.info('Random game recommendation sent', { 
-      gameName: formattedGame.name, 
-      appId: formattedGame.appId 
+    logger.info('Random game recommendation sent', {
+      gameName: formattedGame.name,
+      appId: formattedGame.appId,
     });
 
   } catch (error) {
     logger.error('Error in steam recommend command', error);
-    
+
     const errorEmbed = GameEmbedBuilder.createErrorEmbed(
-      'エラーが発生しました。しばらくしてからもう一度お試しください。'
+      'エラーが発生しました。しばらくしてからもう一度お試しください。',
     );
-    
+
     await interaction.editReply({ embeds: [errorEmbed] });
   }
 };

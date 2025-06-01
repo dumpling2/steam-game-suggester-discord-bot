@@ -6,12 +6,12 @@ module.exports = {
     'utils/**/*.js',
     'commands/**/*.js',
     '!**/node_modules/**',
-    '!**/tests/**'
+    '!**/tests/**',
   ],
   testMatch: [
     '**/__tests__/**/*.js',
-    '**/?(*.)+(spec|test).js'
+    '**/?(*.)+(spec|test).js',
   ],
   verbose: true,
-  testTimeout: 10000
+  testTimeout: 10000,
 };

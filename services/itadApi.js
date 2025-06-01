@@ -22,7 +22,7 @@ class ItadApiService {
 
   async getCurrentDeals(options = {}) {
     try {
-      const response = await this.httpClient.get(`${ITAD_API_BASE_URL}/v01/deals/list`, {
+      const response = await this.httpClient.get(`${ITAD_API_BASE_URL}/get/deals/list/`, {
         params: {
           key: this.apiKey,
           country: 'JP',
@@ -33,7 +33,7 @@ class ItadApiService {
         },
       });
 
-      return response.data;
+      return response.data.data || response.data;
     } catch (error) {
       logger.error('Failed to get deals from ITAD', error);
       throw new Error('IsThereAnyDeal APIからセール情報を取得できませんでした');
@@ -42,16 +42,14 @@ class ItadApiService {
 
   async getGamePrices(gamePlainName) {
     try {
-      const response = await this.httpClient.get(`${ITAD_API_BASE_URL}/v01/game/prices`, {
-        params: {
-          key: this.apiKey,
-          plains: gamePlainName,
-          country: 'JP',
-          shops: 'steam',
-        },
+      const response = await this.httpClient.post(`${ITAD_API_BASE_URL}/post/games/prices/v3`, {
+        key: this.apiKey,
+        games: [gamePlainName],
+        country: 'JP',
+        shops: 'steam',
       });
 
-      return response.data;
+      return response.data.data || response.data;
     } catch (error) {
       logger.error('Failed to get game prices from ITAD', error, { gamePlainName });
       return null;
@@ -60,15 +58,15 @@ class ItadApiService {
 
   async searchGame(gameName) {
     try {
-      const response = await this.httpClient.get(`${ITAD_API_BASE_URL}/v01/search/search`, {
+      const response = await this.httpClient.get(`${ITAD_API_BASE_URL}/get/games/search/v1`, {
         params: {
           key: this.apiKey,
-          q: gameName,
+          title: gameName,
           limit: 5,
         },
       });
 
-      return response.data;
+      return response.data.data || response.data;
     } catch (error) {
       logger.error('Failed to search game in ITAD', error, { gameName });
       return null;
@@ -77,7 +75,7 @@ class ItadApiService {
 
   async getTopDeals(minDiscount = 50) {
     try {
-      const response = await this.httpClient.get(`${ITAD_API_BASE_URL}/v01/deals/list`, {
+      const response = await this.httpClient.get(`${ITAD_API_BASE_URL}/get/deals/list/`, {
         params: {
           key: this.apiKey,
           country: 'JP',
@@ -87,8 +85,9 @@ class ItadApiService {
         },
       });
 
-      if (response.data && response.data.list) {
-        return response.data.list.filter(deal => deal.price_cut >= minDiscount);
+      const deals = response.data.data?.list || response.data.list || [];
+      if (deals.length > 0) {
+        return deals.filter(deal => deal.price_cut >= minDiscount);
       }
 
       return [];
@@ -114,11 +113,11 @@ class ItadApiService {
         params.price_max = maxPrice;
       }
 
-      const response = await this.httpClient.get(`${ITAD_API_BASE_URL}/v01/deals/list`, {
+      const response = await this.httpClient.get(`${ITAD_API_BASE_URL}/get/deals/list/`, {
         params,
       });
 
-      return response.data.list || [];
+      return response.data.data?.list || response.data.list || [];
     } catch (error) {
       logger.error('Failed to get games by price range from ITAD', error);
       return [];

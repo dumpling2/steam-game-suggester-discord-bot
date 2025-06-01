@@ -2,7 +2,7 @@ module.exports = {
   STEAM_API_BASE_URL: 'https://api.steampowered.com',
   STEAM_STORE_BASE_URL: 'https://store.steampowered.com',
   RAWG_API_BASE_URL: 'https://api.rawg.io/api',
-  ITAD_API_BASE_URL: 'https://api.isthereanydeal.com/v01',
+  ITAD_API_BASE_URL: 'https://api.isthereanydeal.com',
 
   CACHE_DURATION: {
     STEAM_APP_LIST: 24 * 60 * 60 * 1000, // 24 hours

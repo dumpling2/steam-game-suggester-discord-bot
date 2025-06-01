@@ -22,7 +22,7 @@ class ItadApiService {
 
   async getCurrentDeals(options = {}) {
     try {
-      const response = await this.httpClient.get(`${ITAD_API_BASE_URL}/deals/v01/list`, {
+      const response = await this.httpClient.get(`${ITAD_API_BASE_URL}/v01/deals/list`, {
         params: {
           key: this.apiKey,
           country: 'JP',
@@ -42,7 +42,7 @@ class ItadApiService {
 
   async getGamePrices(gamePlainName) {
     try {
-      const response = await this.httpClient.get(`${ITAD_API_BASE_URL}/game/prices`, {
+      const response = await this.httpClient.get(`${ITAD_API_BASE_URL}/v01/game/prices`, {
         params: {
           key: this.apiKey,
           plains: gamePlainName,
@@ -60,7 +60,7 @@ class ItadApiService {
 
   async searchGame(gameName) {
     try {
-      const response = await this.httpClient.get(`${ITAD_API_BASE_URL}/search/search`, {
+      const response = await this.httpClient.get(`${ITAD_API_BASE_URL}/v01/search/search`, {
         params: {
           key: this.apiKey,
           q: gameName,
@@ -77,7 +77,7 @@ class ItadApiService {
 
   async getTopDeals(minDiscount = 50) {
     try {
-      const response = await this.httpClient.get(`${ITAD_API_BASE_URL}/deals/v01/list`, {
+      const response = await this.httpClient.get(`${ITAD_API_BASE_URL}/v01/deals/list`, {
         params: {
           key: this.apiKey,
           country: 'JP',
@@ -114,7 +114,7 @@ class ItadApiService {
         params.price_max = maxPrice;
       }
 
-      const response = await this.httpClient.get(`${ITAD_API_BASE_URL}/deals/v01/list`, {
+      const response = await this.httpClient.get(`${ITAD_API_BASE_URL}/v01/deals/list`, {
         params,
       });
 

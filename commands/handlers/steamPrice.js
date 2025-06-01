@@ -1,5 +1,6 @@
 const itadApi = require('../../services/itadApi');
 const rawgApi = require('../../services/rawgApi');
+const steamApi = require('../../services/steamApi');
 const GameEmbedBuilder = require('../../utils/embedBuilder');
 const logger = require('../../utils/logger');
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require('discord.js');
@@ -14,13 +15,64 @@ module.exports = async function handleSteamPrice(interaction, maxPrice) {
   try {
     logger.info('Getting games by price', { maxPrice: price, isFree, userId: interaction.user.id });
 
-    const games = await itadApi.getGamesByPriceRange(price / 100, isFree); // Convert yen to dollars approximation
+    let games = [];
+
+    // ITAD APIを試す
+    try {
+      games = await itadApi.getGamesByPriceRange(price / 100, isFree); // Convert yen to dollars approximation
+    } catch (error) {
+      logger.warn('ITAD API failed, using fallback method', error);
+    }
+
+    // ITAD APIで結果が得られない場合は、無料ゲームの場合のみSteam APIを使用
+    if ((!games || games.length === 0) && isFree) {
+      logger.info('Using Steam API for free games fallback');
+      const randomApp = await steamApi.getRandomGame();
+      const gameDetails = await steamApi.getAppDetails(randomApp.appid);
+
+      if (gameDetails && gameDetails.is_free) {
+        const formattedGame = steamApi.formatGameDetails(gameDetails);
+        const embed = new EmbedBuilder()
+          .setTitle(formattedGame.name)
+          .setURL(formattedGame.url)
+          .setDescription(formattedGame.description || 'ゲームの説明がありません。')
+          .setColor(EMBED_COLORS.SUCCESS)
+          .setImage(formattedGame.image)
+          .setTimestamp()
+          .setFooter({ text: 'Data from Steam' });
+
+        if (formattedGame.genres && formattedGame.genres.length > 0) {
+          embed.addFields({
+            name: 'ジャンル',
+            value: formattedGame.genres.join(', '),
+            inline: true,
+          });
+        }
+
+        embed.addFields({
+          name: '価格',
+          value: '無料',
+          inline: true,
+        });
+
+        if (formattedGame.releaseDate) {
+          embed.addFields({
+            name: 'リリース日',
+            value: formattedGame.releaseDate,
+            inline: true,
+          });
+        }
+
+        await interaction.editReply({ embeds: [embed] });
+        return;
+      }
+    }
 
     if (!games || games.length === 0) {
       const priceText = isFree ? '無料' : `¥${price}以下`;
       const noResultEmbed = new EmbedBuilder()
         .setTitle('価格検索結果')
-        .setDescription(`${priceText}のゲームが見つかりませんでした。`)
+        .setDescription(`${priceText}のゲームが見つかりませんでした。\n\n${isFree ? 'Steam APIで無料ゲームの検索を試みましたが、見つかりませんでした。' : 'IsThereAnyDeal APIが利用できません。'}`)
         .setColor(EMBED_COLORS.WARNING)
         .setTimestamp();
 

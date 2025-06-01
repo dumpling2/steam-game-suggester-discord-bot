@@ -120,28 +120,33 @@ class RecommendationService {
       const topGames = await rawgApi.getTopRatedGames(4.0);
 
       if (topGames.length > 0) {
-        const randomIndex = Math.floor(Math.random() * Math.min(topGames.length, 10));
-        const selectedGame = topGames[randomIndex];
+        // Steamで利用可能なゲームが見つかるまで試行
+        let attempts = 0;
+        const maxAttempts = Math.min(topGames.length, 20);
 
-        // Steamで検索
-        const steamInfo = await rawgApi.searchSteamGame(selectedGame.name);
-        if (steamInfo && steamInfo.appId) {
-          const gameDetails = await steamApi.getAppDetails(steamInfo.appId);
-          if (gameDetails) {
-            const formatted = steamApi.formatGameDetails(gameDetails);
-            formatted.rating = selectedGame.rating;
-            return formatted;
+        while (attempts < maxAttempts) {
+          const randomIndex = Math.floor(Math.random() * topGames.length);
+          const selectedGame = topGames[randomIndex];
+
+          // Steamで検索
+          const steamInfo = await rawgApi.searchSteamGame(selectedGame.name);
+          if (steamInfo && steamInfo.appId) {
+            const gameDetails = await steamApi.getAppDetails(steamInfo.appId);
+            if (gameDetails && gameDetails.type === 'game') {
+              const formatted = steamApi.formatGameDetails(gameDetails);
+              formatted.rating = selectedGame.rating;
+              return formatted;
+            }
           }
-        }
 
-        // Steam情報が見つからない場合はRAWGデータを使用
-        return rawgApi.formatGameForEmbed(selectedGame);
+          attempts++;
+        }
       }
     } catch (error) {
       logger.error('高評価ゲーム推薦エラー:', error);
     }
 
-    // フォールバック
+    // フォールバック - Steamゲームのランダム推薦
     return await this.getRandomRecommendation();
   }
 
@@ -172,9 +177,13 @@ class RecommendationService {
           !playedGameIds.has(game.id),
         );
 
-        if (unplayedGames.length > 0) {
-          const selectedGame = unplayedGames[0];
-          return await this.formatRAWGGame(selectedGame);
+        // Steamで利用可能なゲームを探す
+        for (const game of unplayedGames) {
+          const steamGame = await this.formatRAWGGame(game);
+          // formatRAWGGameがSteamゲームを返した場合のみ使用
+          if (steamGame && steamGame.appId) {
+            return steamGame;
+          }
         }
       }
     } catch (error) {
@@ -248,22 +257,22 @@ class RecommendationService {
    * RAWGゲームデータをフォーマット
    */
   async formatRAWGGame(rawgGame) {
-    const formatted = rawgApi.formatGameForEmbed(rawgGame);
-
     // Steamで検索を試みる
     const steamInfo = await rawgApi.searchSteamGame(rawgGame.name);
     if (steamInfo && steamInfo.appId) {
       const steamDetails = await steamApi.getAppDetails(steamInfo.appId);
-      if (steamDetails) {
+      if (steamDetails && steamDetails.type === 'game') {
         const steamFormatted = steamApi.formatGameDetails(steamDetails);
         // RAWGのレーティングを保持
-        steamFormatted.rating = formatted.rating;
+        if (rawgGame.rating) {
+          steamFormatted.rating = `${rawgGame.rating}/5.0`;
+        }
         return steamFormatted;
       }
     }
 
-    // Steamデータが見つからない場合はRAWGデータを返す
-    return formatted;
+    // Steamデータが見つからない場合はnullを返す
+    return null;
   }
 }
 
